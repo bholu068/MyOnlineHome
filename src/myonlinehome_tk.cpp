@@ -367,7 +367,6 @@ void myonlinehome_tk::test_network()
 {
   String data="testNetwork";
   String result = httpspost(data);
-  Serial.println(result);
   DynamicJsonBuffer  jsonBuffer(2000);
   JsonObject& root = jsonBuffer.parseObject(result);
 
@@ -438,7 +437,7 @@ void myonlinehome_tk::get_sensors()
 {
   if(this->_node_valid > 0)
   {
-    Serial.println("This is valid Node. Move Forward.");
+    Serial.println("This is valid Node. Checking Next Detail.");
   }
   else
   {
@@ -459,6 +458,17 @@ void myonlinehome_tk::get_sensors()
   }
 
   String details = root["data"].as<String>();
+  int sensors_attached = root["Sensors_Attached"].as<int>();
+  Serial.print("Node Have ");
+  Serial.print(sensors_attached);
+  Serial.println(" Sensors Attached With It");
+  for(int i=1; i <= sensors_attached; i++)
+  {
+    Serial.print("Sensor ");
+    Serial.print(i);
+    Serial.print(": ");
+    Serial.println(root["data"]["Sensor"][i].as<String>());
+  }
   Serial.println("Node Have Following Details");
   Serial.println(details);
 }
