@@ -462,7 +462,7 @@ void myonlinehome_tk::get_sensors()
   Serial.print("Node Have ");
   Serial.print(sensors_attached);
   Serial.println(" Sensors Attached With It");
-  for(int i=1; i <= sensors_attached; i++)
+  for(int i=0; i <= sensors_attached; i++)
   {
     Serial.print("Sensor ");
     Serial.print(i);
