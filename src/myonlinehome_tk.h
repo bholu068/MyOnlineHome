@@ -1,12 +1,12 @@
 /*
  * myonlinehome_tk.h - A basic class to setup MyOnlineHome.tk settings on ESP8266 NodeMCU v3
- * Created by Electrical Engineering Students and Staff @ CDL Govt. Polytechnic, Nathusari Chopta on 07/10/2018
+ * Created by Sunil Saharan on 07/10/2018
  * Version 0.0.1 - See readMe
  */
 
 #ifndef moh_h
 #define moh_h
-#define MOH_VER	"v0.0.4"
+#define MOH_VER	"v0.0.1"
 #define MAX_SSID_LEN 32
 
 #include "Arduino.h"
@@ -79,6 +79,7 @@ class myonlinehome_tk
 		void test_node();
 		void set_node_secret(const char* node_secret);
 		void get_sensors();
+		void test_network();
 
 
 
