@@ -469,8 +469,8 @@ void myonlinehome_tk::get_sensors()
     Serial.print(": ");
     Serial.println(root["data"]["Sensor"][i].as<String>());
   }
-  Serial.println("Node Have Following Details");
-  Serial.println(details);
+  /*Serial.println("Node Have Following Details");
+  Serial.println(details);*/
 }
 
 
