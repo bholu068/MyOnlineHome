@@ -1,6 +1,6 @@
 /*
  * myonlinehome_tk.h - A basic class to setup MyOnlineHome.tk settings on ESP8266 NodeMCU v3
- * Created by Sunil Saharan on 07/10/2018
+ * Created by Electrical Engineering Students and Staff @ CDL Govt. Polytechnic, Nathusari Chopta on 07/10/2018
  * Version 0.0.1 - See readMe
  */
 
@@ -8,6 +8,7 @@
 #define moh_h
 #define MOH_VER	"v0.0.1"
 #define MAX_SSID_LEN 32
+#define MAX_SENSORS_ATTACHED 100
 
 #include "Arduino.h"
 #include "ESP8266WiFi.h"
@@ -48,6 +49,7 @@ class myonlinehome_tk
 		// Declare Private Variables - Final
 		char* _ssid;
 		char* _pwd;
+		int sensors_attached;
 		char ssid[MAX_SSID_LEN] = {};
 		int _node_id = 0;
 		const char* _node_secret = "";
