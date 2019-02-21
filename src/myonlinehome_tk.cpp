@@ -167,6 +167,9 @@ void myonlinehome_tk::WIFI_Connect()
     delay(1000);
     if(strlen(ssid) > 0)
     {
+      Serial.print("Connecting to ...");
+      Serial.println(ssid);
+
      WiFi.begin(ssid);
      unsigned short try_cnt = 0;
      while (WiFi.status() != WL_CONNECTED && try_cnt < 60)
@@ -180,6 +183,7 @@ void myonlinehome_tk::WIFI_Connect()
        Serial.print(" (Local IP : ");
        Serial.print(WiFi.localIP());
        Serial.println(")");
+       test_network();
        String internal_ip = WiFi.localIP().toString();
        this->_node_internal_ip = internal_ip ;
        this->_ssid = ssid;
@@ -320,9 +324,6 @@ void myonlinehome_tk::scanAndSort() {
       {
         memset(ssid, 0, MAX_SSID_LEN);
         strncpy(ssid, WiFi.SSID(indices[i]).c_str(), MAX_SSID_LEN);
-        Serial.print(i);
-        Serial.print(" Open Network is: \t");
-        Serial.println(WiFi.SSID(indices[i]));
         break;
       }
     }
@@ -361,6 +362,31 @@ void myonlinehome_tk::setclient(WiFiClientSecure client)
 void myonlinehome_tk::set_node_secret(const char* node_secret)
 {
   this->_node_secret = node_secret;
+}
+void myonlinehome_tk::test_network()
+{
+  String data="testNetwork";
+  String result = httpspost(data);
+  Serial.println(result);
+  DynamicJsonBuffer  jsonBuffer(2000);
+  JsonObject& root = jsonBuffer.parseObject(result);
+
+  // Test if parsing succeeds.
+  if (!root.success()) {
+    Serial.println("Connection Failed");
+    connect_private();
+    return;
+  }
+
+  String status = root["Network"].as<String>();
+  if(status == "Success")
+  {
+    Serial.println("Network OK");
+  }
+  else
+  {
+    connect_private();
+  }
 }
 void myonlinehome_tk::test_node()
 {
@@ -455,17 +481,20 @@ String myonlinehome_tk::httpspost(String data)
     Serial.println(")");*/
     data = "action="+ data + "&userName=" +(String)this->_node_username + "&userPassword=" +(String)this->_node_password;
     //Serial.println(data);
-    Serial.print("Connecting to....");
-    Serial.print(this->server);
-    Serial.print(":");
-    Serial.println(this->port);
-    if (!client.connect("myonlinehome.tk", this->port))
+    Serial.print("Connecting to server..... ");
+    if (!client.connect(this->server, this->port))
     {
       WiFi.disconnect();
+      Serial.println(" Failed.");
       return "Connection Failed";
+    }
+    else
+    {
+      Serial.println(" Connected.");
     }
     if (client.verify(this->fingerprint, this->server))
     {
+        Serial.println("Authenticated");
         Serial.print("[Sending request]");
         client.println("POST " + url + " HTTP/1.1");
         client.println("Host: " + (String)server);
