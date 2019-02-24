@@ -6,9 +6,12 @@
 
 #ifndef moh_h
 #define moh_h
-#define MOH_VER	"v0.0.1"
+#define MOH_VER	"v0.0.2-Alpha"
 #define MAX_SSID_LEN 32
+
+#ifndef MAX_SENSORS_ATTACHED
 #define MAX_SENSORS_ATTACHED 100
+#endif
 
 #include "Arduino.h"
 #include "ESP8266WiFi.h"
@@ -35,6 +38,7 @@ class myonlinehome_tk
 		void custom_set(char* node_ssid, char* node_passkey);
 		String httpspost(String data);
 		void show_basic_info(void);
+		void show_sensor_info(void);
 
 
 
@@ -49,6 +53,8 @@ class myonlinehome_tk
 		// Declare Private Variables - Final
 		char* _ssid;
 		char* _pwd;
+		char* _ssid_reserve;
+		char* _pwd_reserve;
 		int sensors_attached;
 		char ssid[MAX_SSID_LEN] = {};
 		int _node_id = 0;
@@ -63,6 +69,7 @@ class myonlinehome_tk
 		String _node_location = "";
 		bool _node_valid = false;
 		WiFiClientSecure client;
+		String sensor[MAX_SENSORS_ATTACHED];
 
 
 		// Declare Private Functions - Final
@@ -82,8 +89,10 @@ class myonlinehome_tk
 		void set_node_secret(const char* node_secret);
 		void get_sensors();
 		void test_network();
-
-
+		void update_sensors();
+		void restart_node();
+		void print_data(String data);
+		void print_data_ln(String data);
 
 		// Declare Test Private Functions
 
