@@ -11,10 +11,10 @@ myonlinehome_tk::myonlinehome_tk()
   Serial.begin(9600);
   for(int i=1;i<=50;i++)
   {
-    Serial.println();
+    print_data_ln("");
   }
-  Serial.print("Starting Serial Monitor.......");
-  Serial.println("OK");
+  print_data("Starting Serial Monitor.......");
+  print_data_ln("OK");
   pinMode(LED_BUILTIN, OUTPUT);
   delay(100);
   digitalWrite(LED_BUILTIN, HIGH);
@@ -23,21 +23,23 @@ myonlinehome_tk::myonlinehome_tk()
 void myonlinehome_tk::getVersion()
 {
   char* ver = MOH_VER;
-  Serial.println(ver);
+  print_data_ln(ver);
 }
 void myonlinehome_tk::begin(WiFiClientSecure client, const char* node_user, const char* node_password, const char* node_secret, char* node_ssid, char* node_passkey)
 {
+  this->_ssid_reserve = node_ssid;
+  this->_pwd_reserve = node_passkey;
   setclient(client);
   set_node_secret(node_secret);
   printArtWork();
-  Serial.println("Starting MyOnlineHome Client ..........OK");
+  print_data_ln("Starting MyOnlineHome Client ..........OK");
   if(strlen(node_user) >= 5)
   {
     this->_node_username = node_user;
   }
   else
   {
-    Serial.println("Minimum 5 Character Username is Required.");
+    print_data_ln("Minimum 5 Character Username is Required.");
     return;
   }
   if(strlen(node_password) >= 5)
@@ -46,7 +48,7 @@ void myonlinehome_tk::begin(WiFiClientSecure client, const char* node_user, cons
   }
   else
   {
-    Serial.println("Minimum 5 Character Password is Required.");
+    print_data_ln("Minimum 5 Character Password is Required.");
     return;
   }
   String ssid_buffer = this->read_EEPROM_SSID().c_str();
@@ -54,7 +56,7 @@ void myonlinehome_tk::begin(WiFiClientSecure client, const char* node_user, cons
   String ssid_pwd = this->read_EEPROM_PWD().c_str();
   this->_pwd = (char*) ssid_pwd.c_str();
   delay(100);
-  Serial.println("Note: Please Use moh.custom_set(node_SSID, node_PWD); to connect to custom ssid.");
+  print_data_ln("Note: Please Use moh.custom_set(node_SSID, node_PWD); to connect to custom ssid.");
   custom_set(node_ssid, node_passkey);
   delay(100);
   if (WiFi.status() != WL_CONNECTED)
@@ -72,18 +74,18 @@ myonlinehome_tk::~myonlinehome_tk()
 }
 void myonlinehome_tk::printArtWork(void)
 {
-    Serial.println();
-    Serial.println("  MOH MOH                MOH MOH                                               ");
-    Serial.println("MOH      MOH         MOH      MOH                                              ");
-    Serial.println("            MOH   MOH                                    MOH             MOH   ");
-    Serial.println("         MOH   MOH   MOH             MOH MOH MOH MOH     MOH             MOH   ");
-    Serial.println("         MOH   MOH   MOH           MOH             MOH   MOH             MOH   ");
-    Serial.println("         MOH   MOH   MOH           MOH             MOH     MOH MOH MOH MOH     ");
-    Serial.println("         MOH   MOH   MOH           MOH             MOH   MOH             MOH   ");
-    Serial.println("         MOH         MOH           MOH             MOH   MOH             MOH   ");
-    Serial.println("         MOH         MOH             MOH MOH MOH MOH     MOH             MOH   ");
-    Serial.println("                                                                               ");
-    Serial.print("                                                                               ");
+    print_data_ln("");
+    print_data_ln("  MOH MOH                MOH MOH                                               ");
+    print_data_ln("MOH      MOH         MOH      MOH                                              ");
+    print_data_ln("            MOH   MOH                                    MOH             MOH   ");
+    print_data_ln("         MOH   MOH   MOH             MOH MOH MOH MOH     MOH             MOH   ");
+    print_data_ln("         MOH   MOH   MOH           MOH             MOH   MOH             MOH   ");
+    print_data_ln("         MOH   MOH   MOH           MOH             MOH     MOH MOH MOH MOH     ");
+    print_data_ln("         MOH   MOH   MOH           MOH             MOH   MOH             MOH   ");
+    print_data_ln("         MOH         MOH           MOH             MOH   MOH             MOH   ");
+    print_data_ln("         MOH         MOH             MOH MOH MOH MOH     MOH             MOH   ");
+    print_data_ln("                                                                               ");
+    print_data("                                                                               ");
     getVersion();
     WiFi.disconnect();
 }
@@ -93,24 +95,24 @@ void myonlinehome_tk::custom_set(char* node_ssid, char* node_passkey)
   String ssid_buffer = this->read_EEPROM_SSID().c_str();
   char* this_ssid = (char*) ssid_buffer.c_str();
   String pwd_buffer = this->read_EEPROM_PWD().c_str();
-  char* this_pwd = (char*) ssid_buffer.c_str();
+  char* this_pwd = (char*) pwd_buffer.c_str();
   if(ssid_buffer == node_ssid)
   {
-    Serial.println("Same SSID is stored. No need to Overwrite.");
+    print_data_ln("Same SSID is stored. No need to Overwrite.");
   }
   else
   {
     write_EEPROM_SSID(node_ssid);
-    Serial.println("SSID Overwritten.");
+    print_data_ln("SSID Overwritten.");
   }
   if(pwd_buffer == node_passkey)
   {
-    Serial.println("Same Password is stored. No need to Overwrite.");
+    print_data_ln("Same Password is stored. No need to Overwrite.");
   }
   else
   {
     write_EEPROM_PWD(node_passkey);
-    Serial.println("Passkey Overwritten.");
+    print_data_ln("Passkey Overwritten.");
   }
   this->_ssid = node_ssid;
   this->_pwd = node_passkey;
@@ -130,6 +132,8 @@ String myonlinehome_tk::_read_EEPROM(int min, int max)
         buffer += char(EEPROM.read(L));
       }
     }
+    //print_data_ln("Read From EEPROM ");
+    //print_data_ln(buffer);
     return buffer;
 }
 
@@ -151,6 +155,8 @@ bool myonlinehome_tk::_write_EEPROM(String buffer, int start)
     EEPROM.write(start + L, buffer[L]);
   }
   EEPROM.commit();
+  //print_data_ln("Written To EEPROM ");
+  //print_data_ln(buffer);
 }
 
 
@@ -167,8 +173,8 @@ void myonlinehome_tk::WIFI_Connect()
     delay(1000);
     if(strlen(ssid) > 0)
     {
-      Serial.print("Connecting to ...");
-      Serial.println(ssid);
+      print_data("Connecting to ...");
+      print_data_ln(ssid);
 
      WiFi.begin(ssid);
      unsigned short try_cnt = 0;
@@ -179,10 +185,10 @@ void myonlinehome_tk::WIFI_Connect()
      }
      if(WiFi.status() == WL_CONNECTED)
      {
-       Serial.print("Connected To WiFi !");
-       Serial.print(" (Local IP : ");
-       Serial.print(WiFi.localIP());
-       Serial.println(")");
+       print_data("Connected To WiFi !");
+       print_data(" (Local IP : ");
+       print_data((String)WiFi.localIP().toString());
+       print_data_ln(")");
        test_network();
        String internal_ip = WiFi.localIP().toString();
        this->_node_internal_ip = internal_ip ;
@@ -190,13 +196,13 @@ void myonlinehome_tk::WIFI_Connect()
      }
      else
      {
-       Serial.println("Connection FAILED");
+       print_data_ln("Connection FAILED");
        connect_private();
      }
     }
     else
     {
-     Serial.println("No open networks available. :-(");
+     print_data_ln("No open networks available. :-(");
      connect_private();
     }
     digitalWrite(2,0);
@@ -204,7 +210,7 @@ void myonlinehome_tk::WIFI_Connect()
 }
 void myonlinehome_tk::connect_private()
 {
-  Serial.println("Trying To Connect To Private WiFi Network ...");
+  print_data_ln("Trying To Connect To Private WiFi Network ...");
   WiFi.softAPdisconnect();
   WiFi.disconnect();
   WiFi.mode(WIFI_STA);
@@ -214,10 +220,10 @@ void myonlinehome_tk::connect_private()
   String ssid_pwd = this->read_EEPROM_PWD().c_str();
   this->_pwd = (char*) ssid_pwd.c_str();
 
-  Serial.print("Private ssid is - ");
-  Serial.println(this->_ssid);
-  //Serial.print("Passkey is - ");
-  //Serial.println(this->_pwd);
+  print_data("Private ssid is - ");
+  print_data_ln(this->_ssid);
+  //print_data("Passkey is - ");
+  //print_data_ln(this->_pwd);
   WiFi.begin(this->_ssid, this->_pwd);
    // Wait for connection
   for (int i = 0; i < 50; i++)
@@ -229,16 +235,16 @@ void myonlinehome_tk::connect_private()
   }
   if(WiFi.status() == WL_CONNECTED)
   {
-    Serial.print("Connected To WiFi !");
-    Serial.print(" (Local IP : ");
-    Serial.print(WiFi.localIP());
-    Serial.println(")");
+    print_data("Connected To WiFi !");
+    print_data(" (Local IP : ");
+    print_data((String)WiFi.localIP().toString());
+    print_data_ln(")");
     String internal_ip = WiFi.localIP().toString();
     this->_node_internal_ip = internal_ip ;
   }
   else
   {
-    Serial.println("Unable To Connect. Please Use moh.WiFi_connect();");
+    print_data_ln("Unable To Connect. Please Use moh.WiFi_connect();");
   }
 }
 
@@ -247,33 +253,33 @@ void myonlinehome_tk::scanAndSort() {
   int n = WiFi.scanNetworks();
   if (n == 0)
   {
-    Serial.println("No Networks Found.");
+    print_data_ln("No Networks Found.");
   }
   else
   {
-    Serial.print(n);
-    Serial.println(" Networks Found.");
+    print_data((String)n);
+    print_data_ln(" Networks Found.");
     int indices[n];
-    Serial.println("-----------------------");
-    Serial.print("Network Name    (Encryption) - ");
-    Serial.println("Signal Strength: ");
+    print_data_ln("-----------------------");
+    print_data("Network Name    (Encryption) - ");
+    print_data_ln("Signal Strength: ");
     for (int i = 0; i < n; i++)
     {
       indices[i] = i;
       if(WiFi.SSID(i).length() > 14)
       {
-        Serial.print(WiFi.SSID(i));
-        Serial.print("(");
+        print_data(WiFi.SSID(i));
+        print_data("(");
       }
       else if(WiFi.SSID(i).length() > 10)
       {
-        Serial.print(WiFi.SSID(i));
-        Serial.print("\t (");
+        print_data(WiFi.SSID(i));
+        print_data("\t (");
       }
       else
       {
-        Serial.print(WiFi.SSID(i));
-        Serial.print("\t \t (");
+        print_data(WiFi.SSID(i));
+        print_data("\t \t (");
       }
 
       byte encryption = WiFi.encryptionType(i);
@@ -300,12 +306,12 @@ void myonlinehome_tk::scanAndSort() {
 
         break;
       }
-      Serial.print(Encryption_This);
-      Serial.print(")");
-      Serial.println(WiFi.RSSI(i));
+      print_data(Encryption_This);
+      print_data(")");
+      print_data_ln((String)WiFi.RSSI(i));
 
     }
-    Serial.println("-----------------------");
+    print_data_ln("-----------------------");
 
 
     for (int i = 0; i < n; i++)
@@ -329,7 +335,16 @@ void myonlinehome_tk::scanAndSort() {
     }
   }
 }
-
+void myonlinehome_tk::restart_node()
+{
+ print_data_ln("Restarting Node.....");
+ delay(1000);
+ String ssid_buffer = this->read_EEPROM_SSID().c_str();
+ char* this_ssid = (char*) ssid_buffer.c_str();
+ String pwd_buffer = this->read_EEPROM_PWD().c_str();
+ char* this_pwd = (char*) pwd_buffer.c_str();
+ begin(this->client, this->_node_username, this->_node_password, this->_node_secret, this_ssid, this_pwd);
+}
 
 String myonlinehome_tk::read_EEPROM_SSID()
 {
@@ -372,15 +387,16 @@ void myonlinehome_tk::test_network()
 
   // Test if parsing succeeds.
   if (!root.success()) {
-    Serial.println("Connection Failed");
-    connect_private();
+    print_data_ln("Connection Failed");
+    delay(2000);
+    restart_node();
     return;
   }
 
   String status = root["Network"].as<String>();
   if(status == "Success")
   {
-    Serial.println("Network OK");
+    print_data_ln("Network OK");
   }
   else
   {
@@ -393,13 +409,15 @@ void myonlinehome_tk::test_node()
   data += "&node_secret=";
   data += (String) this->_node_secret;
   String result = httpspost(data);
-  //Serial.println(result);
+  //print_data_ln(result);
   DynamicJsonBuffer  jsonBuffer(2000);
   JsonObject& root = jsonBuffer.parseObject(result);
 
   // Test if parsing succeeds.
   if (!root.success()) {
-    Serial.println("parseObject() failed");
+    print_data_ln("parseObject() failed");
+    delay(2000);
+    restart_node();
     return;
   }
 
@@ -429,48 +447,97 @@ void myonlinehome_tk::test_node()
   node_location += root["data"]["postal"].as<String>();
   this->_node_location = node_location;
   get_sensors();
-  Serial.println("Node Updated");
+  print_data_ln("Node Updated");
 }
 
 
 void myonlinehome_tk::get_sensors()
 {
+  print_data("Checking Node Status .......");
   if(this->_node_valid > 0)
   {
-    Serial.println("This is valid Node. Checking Next Detail.");
+    print_data_ln(" Valid");
   }
   else
   {
-    Serial.println("This is Invalid Node. Get Valid Node ID First.");
+    print_data_ln(" Invalid");
   }
   String data="getSensors";
   data += "&node_id=";
   data += (String) this->_node_id;
   String result = httpspost(data);
-  Serial.println(result);
+  //print_data_ln(result);
   DynamicJsonBuffer  jsonBuffer(2000);
   JsonObject& root = jsonBuffer.parseObject(result);
 
   // Test if parsing succeeds.
   if (!root.success()) {
-    Serial.println("parseObject() failed");
+    print_data_ln("parseObject() failed");
+    delay(2000);
+    restart_node();
     return;
   }
 
   String details = root["data"].as<String>();
   int sensors_attached = root["Sensors_Attached"].as<int>();
-  Serial.print("Node Have ");
-  Serial.print(sensors_attached);
-  Serial.println(" Sensors Attached With It");
+  print_data("Node Have ");
+  print_data((String)sensors_attached);
+  this->sensors_attached = sensors_attached;
+  print_data_ln(" Sensors Attached With It");
   for(int i=0; i <= sensors_attached; i++)
   {
-    Serial.print("Sensor ");
-    Serial.print(i);
-    Serial.print(": ");
-    Serial.println(root["data"]["Sensor"][i].as<String>());
+    String this_sensor= root["data"]["Sensor"][i].as<String>();
+    this->sensor[i]= this_sensor;
   }
-  /*Serial.println("Node Have Following Details");
-  Serial.println(details);*/
+  show_basic_info();
+
+  /*print_data_ln("Node Have Following Details");
+  print_data_ln(details);*/
+}
+
+
+void myonlinehome_tk::update_sensors()
+{
+  if(this->_node_valid > 0)
+  {
+   String data="getSensors";
+   data += "&node_id=";
+   data += (String) this->_node_id;
+   String result = httpspost(data);
+   //print_data_ln(result);
+   DynamicJsonBuffer  jsonBuffer(2000);
+   JsonObject& root = jsonBuffer.parseObject(result);
+
+   // Test if parsing succeeds.
+   if (!root.success()) {
+     print_data_ln("parseObject() failed");
+     delay(2000);
+     restart_node();
+     return;
+   }
+
+   String details = root["data"].as<String>();
+   int sensors_attached = root["Sensors_Attached"].as<int>();
+   print_data("Node Have ");
+   print_data((String)sensors_attached);
+   print_data_ln(" Sensors Attached With It");
+   if(sensors_attached != this->sensors_attached)
+   {
+    print_data_ln("No of Sensors in this Node has been changed. Restarting NodeMCU in 5 Seconds");
+   }
+   this->sensors_attached = sensors_attached;
+   for(int i=0; i <= sensors_attached; i++)
+   {
+    String this_sensor= root["data"]["Sensor"][i].as<String>();
+    this->sensor[i]= this_sensor;
+   }
+  }
+  else
+  {
+    print_data_ln("Invalid Node. Restarting NodeMCU in 5 Seconds");
+    delay(5000);
+    restart_node();
+  }
 }
 
 
@@ -486,26 +553,28 @@ String myonlinehome_tk::httpspost(String data)
   }
   else
   {
-    /*Serial.print("WiFi is Connected! (Local IP: ");
-    Serial.print(WiFi.localIP());
-    Serial.println(")");*/
     data = "action="+ data + "&userName=" +(String)this->_node_username + "&userPassword=" +(String)this->_node_password;
-    //Serial.println(data);
-    Serial.print("Connecting to server..... ");
-    if (!client.connect(this->server, this->port))
+    //print_data_ln(data);
+    delay(10);
+    //client.setFingerprint(this->fingerprint);
+    print_data("Connecting to server..... ");
+    if (!client.connect("myonlinehome.tk", 443))
     {
       WiFi.disconnect();
-      Serial.println(" Failed.");
+      print_data_ln(" Failed.");
+      delay(5000);
+      print_data_ln("Restarting Node in 5 Seconds");
+      delay(5000);
+      restart_node();
       return "Connection Failed";
     }
     else
     {
-      Serial.println(" Connected.");
+      print_data_ln(" Connected.");
     }
     if (client.verify(this->fingerprint, this->server))
     {
-        Serial.println("Authenticated");
-        Serial.print("[Sending request]");
+        print_data("[Sending request]");
         client.println("POST " + url + " HTTP/1.1");
         client.println("Host: " + (String)server);
         client.println("User-Agent: ESP8266/1.0");
@@ -515,16 +584,16 @@ String myonlinehome_tk::httpspost(String data)
         client.println(data.length());
         client.println();
         client.println(data);
-        Serial.println("...... OK");
+        print_data_ln("...... OK");
         delay(10);
 
-        Serial.print("[Recieving Response:]");
+        print_data("[Recieving Data:]");
         String response = client.readString();
-        //Serial.println(response);
+        //print_data_ln(response);
         int bodypos =  response.indexOf("\r\n\r\n") + 4;
         response=response.substring(bodypos);
         bodypos =  response.indexOf("\n");
-        Serial.println("...... OK");
+        print_data_ln("...... OK");
         return response.substring(bodypos);
       }
       else
@@ -534,39 +603,159 @@ String myonlinehome_tk::httpspost(String data)
       }
     }
 }
-
+void myonlinehome_tk::print_data(String data)
+{
+ Serial.print(data);
+}
+void myonlinehome_tk::print_data_ln(String data)
+{
+ Serial.println(data);
+}
 void myonlinehome_tk::show_basic_info(void)
 {
-  Serial.println("Basic Information Related to This Node are as : ");
-  Serial.print("Node ID     : ");
-  Serial.print(this->_node_id);
+  print_data_ln("Basic Information Related to This Node are as : ");
+  print_data("Node ID     : ");
+  print_data((String)this->_node_id);
   if(this->_node_valid == 1)
   {
-    Serial.println("  [Valid]");
+    print_data_ln("  [Valid]");
   }
   else
   {
-    Serial.println("  [Invalid]");
+    print_data_ln("  [Invalid]");
   }
-  Serial.print("Node Secret : ");
-  Serial.println(this->_node_secret);
-  Serial.print("Node User   : ");
-  Serial.println(this->_node_username);
-  Serial.print("Last Update : ");
-  Serial.println(this->_node_last_update);
-  Serial.print("IP Address  : Int. (");
-  Serial.print(this->_node_internal_ip);
-  Serial.println(")");
-  Serial.print("\t      Ext. (");
-  Serial.print(this->_node_external_ip);
-  Serial.println(")");
-  Serial.print("Location    : ");
-  Serial.println(this->_node_location);
-  Serial.print("WiFi SSID [EEPROM] : ");
+  print_data("Node Secret : ");
+  print_data_ln(this->_node_secret);
+  print_data("Node User   : ");
+  print_data_ln(this->_node_username);
+  print_data("Last Update : ");
+  print_data_ln(this->_node_last_update);
+  print_data("IP Address  : Int. (");
+  print_data(this->_node_internal_ip);
+  print_data_ln(")");
+  print_data("\t      Ext. (");
+  print_data(this->_node_external_ip);
+  print_data_ln(")");
+  print_data("Location    : ");
+  print_data_ln(this->_node_location);
+  print_data("WiFi SSID [EEPROM] : ");
   String ssid_eeprom = this->read_EEPROM_SSID().c_str();
-  Serial.println(ssid_eeprom);
+  print_data_ln(ssid_eeprom);
 }
+void myonlinehome_tk::show_sensor_info(void)
+{
+  update_sensors();
+  print_data("Various Sensor Values For This Node (Node: ");
+  print_data((String)this->_node_id);
+  print_data_ln(")");
+  DynamicJsonBuffer  jsonBuffer(2000);
+  for(int i=0; i < this->sensors_attached; i++)
+  {
+      JsonObject& root = jsonBuffer.parseObject(this->sensor[i]);
+      // Test if parsing succeeds.
+      if (!root.success())
+      {
+       print_data_ln("Unable TO Decode Sensor Data. Please Call Support.");
+       delay(10000);
+       restart_node();
+       return;
+      }
+      //print_data_ln(this->sensor[i]);
+      int sensor_id = root["Sensor_ID"].as<int>();
+      String sensor_name = root["Sensor_Name"].as<String>();
+      int sensor_type = root["Sensor_Type"].as<int>();
+      bool switch_value = 0;
+      if(sensor_type == 0 || sensor_type == 12)
+      {
+        switch_value = root["Sensor_Value"].as<bool>();
+      }
+      int sensor_pin = root["Sensor_Pin"].as<int>();
+      String sensor_value = root["Sensor_Value"].as<String>();
+      String sensor_type_text = root["Sensor_Type_Text"].as<String>();
+      String sensor_pin_mode = root["Sensor_Pin_Mode"].as<String>();
+      if(i==0)
+      {
+        print_data("Sensor ID [Name] \t ");
+        print_data("Sensor Type   \t \t");
+        print_data("Sensor Value \t ");
+        print_data("Sensor Pin \t ");
+        print_data_ln("Sensor Last Updated");
+      }
 
+      print_data((String)sensor_id);
+      print_data(" [");
+      print_data(sensor_name);
+      //print_data((String)sensor_name.length());
+      if(sensor_name.length() < 10)
+      {
+        print_data("]  \t\t");
+      }
+      else if(sensor_name.length() < 18)
+      {
+        print_data("]  \t");
+      }
+      else
+      {
+        print_data("] ");
+      }
+      print_data((String)sensor_type);
+      print_data(" [");
+      print_data(sensor_type_text);
+      if(sensor_type_text.length() < 10)
+      {
+        print_data("]  \t\t");
+      }
+      else if(sensor_type_text.length() < 18)
+      {
+        print_data("]  \t");
+      }
+      else
+      {
+        print_data("]  ");
+      }
+      print_data(sensor_value);
+      if(sensor_value.length() < 10)
+      {
+        print_data(" \t\t ");
+      }
+      else
+      {
+        print_data(" \t ");
+      }
+      print_data((String)sensor_pin);
+      print_data(" [");
+      print_data(sensor_pin_mode);
+      print_data("] \t");
+      print_data_ln(" Coming Soon");
+      if(sensor_pin_mode == "OUTPUT" || sensor_pin_mode == "INPUT")
+      {
+       if(sensor_pin_mode == "OUTPUT")
+       {
+         pinMode(sensor_pin, OUTPUT);
+         delay(2000);
+         if(sensor_type == 0)
+         {
+           digitalWrite(sensor_pin, switch_value);
+          }
+          if(sensor_type == 12)
+          {
+            digitalWrite(sensor_pin, !switch_value);
+           }
+       }
+       else
+       {
+         delay(1000);
+         pinMode(sensor_pin, INPUT);
+         delay(2000);
+       }
+      }
+      else
+      {
+        print_data_ln("Invalid Pin Mode ");
+        print_data_ln("Resetting Node in 5 Seconds");
+      }
+   }
+}
 
 
 
